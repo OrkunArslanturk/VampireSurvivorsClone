@@ -8,35 +8,26 @@ public class GameManager : MonoBehaviour
 {
     [Header("UI Elements")]
     public GameObject pauseMenu;
-    public GameObject mainMenu;
     public GameObject settingsMenu;
 
-    private bool isPaused = false;
+    public bool isPaused = false;
+    private bool isInSettings = false;
 
-    // Start is called before the first frame update
     void Start()
     {
-        // Ensure game starts unpaused
         isPaused = false;
-
-        // Show the main menu if needed
-        if (mainMenu != null)
-        {
-            ShowMainMenu();
-        }
     }
 
-    // Update is called once per frame
     void Update()
     {
-        // Listen for the pause input (Escape key)
+        // pause input
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (isPaused)
+            if (isPaused && !isInSettings)
             {
                 ResumeGame();
             }
-            else
+            else if (!isPaused && !isInSettings)
             {
                 PauseGame();
             }
@@ -48,7 +39,6 @@ public class GameManager : MonoBehaviour
         isPaused = true;
         pauseMenu.SetActive(true); // Show pause menu
 
-        // Disable all objects that shouldn't be active during pause (e.g., player, enemies, etc.)
         DisableGameObjects();
     }
 
@@ -64,22 +54,20 @@ public class GameManager : MonoBehaviour
 
     void DisableGameObjects()
     {
-        // Example: Disable player input and movement
-        Player player = FindObjectOfType<Player>();  // Assuming your player script is named Player
+        Player player = FindObjectOfType<Player>(); 
         if (player != null)
         {
             player.enabled = false;
         }
 
-        // Example: Disable all enemies
-        Enemy[] enemies = FindObjectsOfType<Enemy>();  // Assuming your enemy script is named Enemy
+        Enemy[] enemies = FindObjectsOfType<Enemy>();
         foreach (Enemy enemy in enemies)
         {
             enemy.enabled = false;
         }
     }
 
-    // Method to enable gameplay objects after resuming
+    // enable gameplay objects after resuming
     void EnableGameObjects()
     {
         // Enable player
@@ -97,18 +85,6 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // Method to load the main menu (if needed)
-    public void ShowMainMenu()
-    {
-        mainMenu.SetActive(true);
-    }
-
-    // Method to hide the main menu and start the game
-    public void StartGame()
-    {
-        mainMenu.SetActive(false);
-    }
-
     // Method to quit the game
     public void QuitGame()
     {
@@ -119,13 +95,17 @@ public class GameManager : MonoBehaviour
     // Method to open settings menu
     public void OpenSettings()
     {
+        isInSettings = true;
         settingsMenu.SetActive(true);
+        pauseMenu.SetActive(false);  // Hide pause menu
     }
 
     // Method to close settings menu
     public void CloseSettings()
     {
+        isInSettings = false;
         settingsMenu.SetActive(false);
+        pauseMenu.SetActive(true); // Show pause menu
     }
 
 }

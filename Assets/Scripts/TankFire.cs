@@ -12,6 +12,8 @@ public class TankFire : MonoBehaviour
 
     private bool isFiring = false;  // To check if firing is active
 
+    public GameManager gameManager;
+    
     void Update()
     {
         // Start firing if not already firing
@@ -28,8 +30,27 @@ public class TankFire : MonoBehaviour
 
         while (true)  // Keep firing as long as the game is running
         {
+            // Check if the game is paused
+            while (gameManager.isPaused)
+            {
+                yield return null;  // Wait for one frame and recheck until the game is unpaused
+            }
             Fire();  // Shoot a bullet
-            yield return new WaitForSeconds(fireInterval);  // Wait for the specified time
+
+            // Wait for the specified interval between shots, but break early if the game is paused
+            float elapsedTime = 0f;
+            while (elapsedTime < fireInterval)
+            {
+                if (gameManager.isPaused)
+                {
+                    yield return null;  // Wait until unpaused
+                }
+                else
+                {
+                    elapsedTime += Time.deltaTime;
+                    yield return null;  // Continue timing until the fire interval is reached
+                }
+            }
         }
     }
 
