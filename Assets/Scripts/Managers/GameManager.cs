@@ -65,6 +65,12 @@ public class GameManager : MonoBehaviour
         {
             enemy.enabled = false;
         }
+
+        MorePowerfulEnemy[] morePowerfulEnemies = FindObjectsOfType<MorePowerfulEnemy>();
+        foreach (MorePowerfulEnemy morePowerfulEnemy in morePowerfulEnemies)
+        {
+            morePowerfulEnemy.enabled = false;
+        }
     }
 
     // enable gameplay objects after resuming
@@ -82,6 +88,12 @@ public class GameManager : MonoBehaviour
         foreach (Enemy enemy in enemies)
         {
             enemy.enabled = true;
+        }
+
+        MorePowerfulEnemy[] morePowerfulEnemies = FindObjectsOfType<MorePowerfulEnemy>();
+        foreach (MorePowerfulEnemy morePowerfulEnemy in morePowerfulEnemies)
+        {
+            morePowerfulEnemy.enabled = true;
         }
     }
 

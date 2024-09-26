@@ -10,7 +10,7 @@ public class Player : MonoBehaviour
     [SerializeField] int currentExperience;
     [SerializeField] int maxExperience;
     [SerializeField] int currentLevel;
-    int xpAmount = 20;  // Amount of XP gained per orb
+    int xpAmount = 25;  // Amount of XP gained per orb
 
     [Header("UI Elements")]
     public TextMeshProUGUI levelText;  // Use TextMeshProUGUI for UI Text
