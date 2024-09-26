@@ -1,9 +1,21 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;  // Import for TextMeshPro
+using UnityEngine.UI;  // Import for Slider
 
 public class Player : MonoBehaviour
 {
+    [Header("XP")]
+    [SerializeField] int currentExperience;
+    [SerializeField] int maxExperience;
+    [SerializeField] int currentLevel;
+    int xpAmount = 20;  // Amount of XP gained per orb
+
+    [Header("UI Elements")]
+    public TextMeshProUGUI levelText;  // Use TextMeshProUGUI for UI Text
+    public Slider experienceBar;  // Slider for experience bar
+
     [Header("Health")]
     [SerializeField] int maxHealth;
     [SerializeField] int health;
@@ -18,11 +30,25 @@ public class Player : MonoBehaviour
     private Vector2 moveDirection;
     private Rigidbody2D rb;
 
+    private void OnEnable()
+    {
+        ExperienceManager.Instance.OnExperienceChange += HandleExperienceChange;
+    }
+
+    private void OnDisable()
+    {
+        ExperienceManager.Instance.OnExperienceChange -= HandleExperienceChange;
+    }
+
     void Start()
     {
         health = maxHealth;
         rb = GetComponent<Rigidbody2D>();
-        damageTimer = damageInterval; // Damage timer start
+        damageTimer = damageInterval;  // Damage timer start
+
+        // Initialize the UI
+        UpdateLevelUI();
+        UpdateExperienceBar();
     }
 
     void Update()
@@ -38,7 +64,7 @@ public class Player : MonoBehaviour
         Move();
     }
 
-    // WASD
+    // WASD Input Handling
     void Inputs()
     {
         float moveX = Input.GetAxisRaw("Horizontal");  // A and D
@@ -55,9 +81,46 @@ public class Player : MonoBehaviour
             float angle = Mathf.Atan2(moveDirection.y, moveDirection.x) * Mathf.Rad2Deg;  // Angle calculation
             transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle + 90f));  // rotation
         }
-
     }
 
+    // Handle Experience Change
+    private void HandleExperienceChange(int newExperience)
+    {
+        currentExperience += newExperience;
+        if (currentExperience >= maxExperience)
+        {
+            LevelUp();
+        }
+
+        UpdateExperienceBar();  // Update experience bar whenever experience changes
+    }
+
+    // Handle Level Up
+    private void LevelUp()
+    {
+        // TODO: Add choosable buffs on UI (future implementation)
+        currentLevel++;
+        currentExperience = 0;  // Reset current experience
+        maxExperience += 20;  // Increase max experience needed for the next level
+
+        // Update the UI
+        UpdateLevelUI();
+        UpdateExperienceBar();
+    }
+
+    // Update Level Text UI
+    private void UpdateLevelUI()
+    {
+        levelText.text = "Level: " + currentLevel;
+    }
+
+    // Update Experience Bar Slider UI
+    private void UpdateExperienceBar()
+    {
+        experienceBar.value = (float)currentExperience / maxExperience;
+    }
+
+    // Handle player damage
     void TakeDamage(int someDamage)
     {
         health -= someDamage;
@@ -67,18 +130,26 @@ public class Player : MonoBehaviour
     void Death()
     {
         print("Player Died");
-
         Time.timeScale = 0f;
     }
 
+    // OnTriggerEnter for XP Orbs and Enemy Collision
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.CompareTag("Enemy"))
         {
-            TakeDamage(10);
+            TakeDamage(10);  // Take damage on contact with enemy
+        }
+
+        if (collision.gameObject.CompareTag("XPOrb"))
+        {
+            Destroy(collision.gameObject);  // Destroy the XP orb
+            print("XP Orb Collected");
+            ExperienceManager.Instance.AddExperience(xpAmount);  // Add experience
         }
     }
 
+    // Continuous damage from enemies
     private void OnTriggerStay2D(Collider2D collision)
     {
         if (collision.gameObject.CompareTag("Enemy"))
@@ -95,6 +166,7 @@ public class Player : MonoBehaviour
         }
     }
 
+    // Reset the damage timer when exiting enemy contact
     private void OnTriggerExit2D(Collider2D collision)
     {
         if (collision.gameObject.CompareTag("Enemy"))

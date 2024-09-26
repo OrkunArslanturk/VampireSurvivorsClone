@@ -164,3 +164,5 @@ MonoBehaviour:
   maxHealth: 30
   health: 0
   moveSpeed: 2
+  xpOrbPrefab: {fileID: 8476864344977211519, guid: 8887277981f01b14b9ad6e5b2552092a, type: 3}
+  xpSpawnChance: 0.8

@@ -12,6 +12,10 @@ public class Enemy : MonoBehaviour
     public float moveSpeed = 2f;
     private Transform player;
 
+    [Header("XP Orb Settings")]
+    public GameObject xpOrbPrefab;  // Reference to the XP orb prefab
+    public float xpSpawnChance = 0.8f;  // 80% chance to spawn XP orb
+
     void Start()
     {
         health = maxHealth;
@@ -34,6 +38,14 @@ public class Enemy : MonoBehaviour
 
     void Death()
     {
+        // Check if we should spawn an XP orb (80% chance)
+        float randomValue = Random.Range(0f, 1f);
+        if (randomValue <= xpSpawnChance)
+        {
+            Instantiate(xpOrbPrefab, transform.position, Quaternion.identity);
+        }
+
+        // Destroy the enemy game object
         Destroy(gameObject);
     }
 
@@ -45,18 +57,17 @@ public class Enemy : MonoBehaviour
         }
     }
 
-
     void RotateTowardsPlayer()
     {
         if (player != null)
         {
-            // Yön vektörü hesaplama (Player'ın pozisyonuna göre)
+            // calculate the vector
             Vector2 direction = (player.position - transform.position).normalized;
 
-            // Açıyı hesapla
+            // calculate angle
             float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
 
-            // Rotasyonu uygula
+            // apply rotation
             transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle + 90f));
         }
     }
