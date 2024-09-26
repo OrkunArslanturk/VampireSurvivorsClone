@@ -14,6 +14,7 @@ public class Player : MonoBehaviour
 
     [Header("UI Elements")]
     public TextMeshProUGUI levelText;  // Use TextMeshProUGUI for UI Text
+    public TextMeshProUGUI HPText;
     public Slider experienceBar;  // Slider for experience bar
 
     [Header("Health")]
@@ -44,11 +45,12 @@ public class Player : MonoBehaviour
     {
         health = maxHealth;
         rb = GetComponent<Rigidbody2D>();
-        damageTimer = damageInterval;  // Damage timer start
+        damageTimer = damageInterval; // Damage timer start
 
         // Initialize the UI
         UpdateLevelUI();
         UpdateExperienceBar();
+        UpdateHPUI();  // Update HP Text at the start
     }
 
     void Update()
@@ -98,6 +100,8 @@ public class Player : MonoBehaviour
     // Handle Level Up
     private void LevelUp()
     {
+        maxHealth += 50;
+        health = maxHealth;
         // TODO: Add choosable buffs on UI (future implementation)
         currentLevel++;
         currentExperience = 0;  // Reset current experience
@@ -105,6 +109,7 @@ public class Player : MonoBehaviour
 
         // Update the UI
         UpdateLevelUI();
+        UpdateHPUI();
         UpdateExperienceBar();
     }
 
@@ -112,6 +117,11 @@ public class Player : MonoBehaviour
     private void UpdateLevelUI()
     {
         levelText.text = "Level: " + currentLevel;
+    }
+
+    private void UpdateHPUI()
+    {
+        HPText.text = "HP: " + health;
     }
 
     // Update Experience Bar Slider UI
@@ -125,6 +135,8 @@ public class Player : MonoBehaviour
     {
         health -= someDamage;
         if (health <= 0) Death();
+
+        UpdateHPUI();  // Update HP UI when the player takes damage
     }
 
     void Death()
