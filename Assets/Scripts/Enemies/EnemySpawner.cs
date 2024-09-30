@@ -6,7 +6,7 @@ public class EnemySpawner : MonoBehaviour
 {
     public GameObject enemyPrefab;  // Enemy prefab
     public GameObject powerfulEnemyPrefab;  // Powerful Enemy prefab
-    public float spawnInterval = 2f;  // Seconds to wait between spawns
+    public float spawnInterval = 4f;  // Seconds to wait between spawns
     public Transform[] spawnPoints;  // Spawn points
     public int powerfulEnemyFrequency = 5;  // Spawn a powerful enemy every 5 normal enemies
 
