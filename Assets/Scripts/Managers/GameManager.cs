@@ -52,6 +52,11 @@ public class GameManager : MonoBehaviour
         EnableGameObjects();
     }
 
+    public void RestartGame()
+    {
+        SceneManager.LoadScene("GameScene");
+    }
+
     void DisableGameObjects()
     {
         Player player = FindObjectOfType<Player>(); 

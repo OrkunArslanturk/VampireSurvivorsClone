@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;  // Import for TextMeshPro
-using UnityEngine.UI;  // Import for Slider
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
@@ -16,6 +16,10 @@ public class Player : MonoBehaviour
     public TextMeshProUGUI levelText;  // Use TextMeshProUGUI for UI Text
     public TextMeshProUGUI HPText;
     public Slider experienceBar;  // Slider for experience bar
+    public GameObject UpgradeCanvas;  // The upgrade canvas for level up options
+    public Button increaseHPButton;  // Button to increase HP
+    public Button shootFasterButton;  // Button to decrease fire interval
+    public GameObject GameoverCanvas;
 
     [Header("Health")]
     [SerializeField] int maxHealth;
@@ -31,6 +35,9 @@ public class Player : MonoBehaviour
     private Vector2 moveDirection;
     private Rigidbody2D rb;
 
+    [Header("Tank Fire")]
+    public TankFire tankFire;  // Reference to the TankFire script (separate script)
+
     private void OnEnable()
     {
         ExperienceManager.Instance.OnExperienceChange += HandleExperienceChange;
@@ -43,6 +50,8 @@ public class Player : MonoBehaviour
 
     void Start()
     {
+        UpgradeCanvas.SetActive(false);
+        GameoverCanvas.SetActive(false);
         health = maxHealth;
         rb = GetComponent<Rigidbody2D>();
         damageTimer = damageInterval; // Damage timer start
@@ -51,6 +60,10 @@ public class Player : MonoBehaviour
         UpdateLevelUI();
         UpdateExperienceBar();
         UpdateHPUI();  // Update HP Text at the start
+
+        // Assign button actions for upgrades
+        increaseHPButton.onClick.AddListener(IncreaseHP);
+        shootFasterButton.onClick.AddListener(ShootFaster);
     }
 
     void Update()
@@ -59,6 +72,16 @@ public class Player : MonoBehaviour
         Move();
 
         if (!enabled) return;  // If the script is disabled, stop the player from receiving input
+
+        if (currentLevel == 4)
+        {
+            EnemySpawner.spawnInterval = 3f;
+        }
+
+        if (currentLevel == 8)
+        {
+            EnemySpawner.spawnInterval = 2f;
+        }
     }
 
     void FixedUpdate()
@@ -100,9 +123,10 @@ public class Player : MonoBehaviour
     // Handle Level Up
     private void LevelUp()
     {
-        maxHealth += 50;
+        UpgradeCanvas.SetActive(true);
+        Time.timeScale = 0f;  // Pause game to let the player select an upgrade
+
         health = maxHealth;
-        // TODO: Add choosable buffs on UI (future implementation)
         currentLevel++;
         currentExperience = 0;  // Reset current experience
         maxExperience += 20;  // Increase max experience needed for the next level
@@ -111,6 +135,31 @@ public class Player : MonoBehaviour
         UpdateLevelUI();
         UpdateHPUI();
         UpdateExperienceBar();
+    }
+
+    // Increase the player's HP by 50
+    public void IncreaseHP()
+    {
+        maxHealth += 50;
+        UpdateHPUI();
+        CloseUpgradeCanvas();
+    }
+
+    // Decrease TankFire's fireInterval by 0.1 seconds
+    public void ShootFaster()
+    {
+        if (tankFire != null)
+        {
+            tankFire.fireInterval -= 0.1f;  // Decrease fire interval
+        }
+        CloseUpgradeCanvas();
+    }
+
+    // Close the upgrade canvas and resume the game
+    private void CloseUpgradeCanvas()
+    {
+        UpgradeCanvas.SetActive(false);
+        Time.timeScale = 1f;  // Resume game
     }
 
     // Update Level Text UI
@@ -137,12 +186,6 @@ public class Player : MonoBehaviour
         if (health <= 0) Death();
 
         UpdateHPUI();  // Update HP UI when the player takes damage
-    }
-
-    void Death()
-    {
-        print("Player Died");
-        Time.timeScale = 0f;
     }
 
     // OnTriggerEnter for XP Orbs and Enemy Collision
@@ -185,5 +228,13 @@ public class Player : MonoBehaviour
         {
             damageTimer = damageInterval;
         }
+    }
+
+    // Handle Player Death
+    void Death()
+    {
+        print("Player Died");
+        Time.timeScale = 0f;
+        GameoverCanvas.SetActive(true);
     }
 }
