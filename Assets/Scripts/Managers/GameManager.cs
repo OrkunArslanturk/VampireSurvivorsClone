@@ -51,6 +51,12 @@ public class GameManager : MonoBehaviour
         // Enable the objects again when resuming
         EnableGameObjects();
     }
+    
+    public void MainMenu()
+    {
+        // Ensure the current kill count is saved before quitting
+        SceneManager.LoadScene("MainMenu");
+    }
 
     public void RestartGame()
     {

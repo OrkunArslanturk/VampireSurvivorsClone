@@ -4,52 +4,56 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
+    public static event System.Action OnEnemyKilled;
+
     [Header("Health")]
-    [SerializeField] int maxHealth;
-    [SerializeField] int health;
+    [SerializeField] protected int maxHealth;
+    [SerializeField] protected int health;
 
     [Header("Movement")]
     public float moveSpeed = 2f;
-    private Transform player;
+    protected Transform player;
 
     [Header("XP Orb Settings")]
     public GameObject xpOrbPrefab;  // Reference to the XP orb prefab
     public float xpSpawnChance = 0.8f;  // 80% chance to spawn XP orb
 
-    void Start()
+    protected virtual void Start()
     {
         health = maxHealth;
-
-        // Finding player in scene
         player = GameObject.FindGameObjectWithTag("Player").transform;
     }
 
-    void Update()
+    protected virtual void Update()
     {
         MoveTowardsPlayer();
         RotateTowardsPlayer();
     }
 
-    void TakeDamage(int someDamage)
+    public virtual void TakeDamage(int damage)
     {
-        health -= someDamage;
-        if (health <= 0) Death();
+        health -= damage;
+        if (health <= 0)
+        {
+            Death();
+        }
     }
 
-    void Death()
+    protected virtual void Death()
     {
-        // Check if we should spawn an XP orb (80% chance)
+        // XP Orb spawn
         float randomValue = Random.Range(0f, 1f);
         if (randomValue <= xpSpawnChance)
         {
             Instantiate(xpOrbPrefab, transform.position, Quaternion.identity);
         }
 
-        // Destroy the enemy game object
+        OnEnemyKilled?.Invoke();
+
         Destroy(gameObject);
     }
 
-    void MoveTowardsPlayer()
+    protected virtual void MoveTowardsPlayer()
     {
         if (player != null)
         {
@@ -57,22 +61,17 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    void RotateTowardsPlayer()
+    protected virtual void RotateTowardsPlayer()
     {
         if (player != null)
         {
-            // calculate the vector
             Vector2 direction = (player.position - transform.position).normalized;
-
-            // calculate angle
             float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-
-            // apply rotation
             transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle + 90f));
         }
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    protected virtual void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.CompareTag("Bullet"))
         {
