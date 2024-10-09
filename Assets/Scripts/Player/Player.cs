@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using TMPro;  // Import for TextMeshPro
+using TMPro;
 using UnityEngine.UI;
 
 public class Player : MonoBehaviour
@@ -10,15 +10,15 @@ public class Player : MonoBehaviour
     [SerializeField] int currentExperience;
     [SerializeField] int maxExperience;
     [SerializeField] int currentLevel;
-    int xpAmount = 25;  // Amount of XP gained per orb
+    int xpAmount = 25;
 
     [Header("UI Elements")]
-    public TextMeshProUGUI levelText;  // Use TextMeshProUGUI for UI Text
+    public TextMeshProUGUI levelText;
     public TextMeshProUGUI HPText;
-    public Slider experienceBar;  // Slider for experience bar
-    public GameObject UpgradeCanvas;  // The upgrade canvas for level up options
-    public Button increaseHPButton;  // Button to increase HP
-    public Button shootFasterButton;  // Button to decrease fire interval
+    public Slider experienceBar;
+    public GameObject UpgradeCanvas;
+    public Button increaseHPButton;
+    public Button shootFasterButton;
     public GameObject GameoverCanvas;
 
     [Header("Health")]
@@ -26,9 +26,9 @@ public class Player : MonoBehaviour
     [SerializeField] int health;
 
     [Header("Damage Settings")]
-    [SerializeField] int damagePerSecond = 10;  // Damage per second
-    [SerializeField] float damageInterval = 2f;  // Damage interval
-    private float damageTimer;  // Damage timer
+    [SerializeField] int damagePerSecond = 10;
+    [SerializeField] float damageInterval = 2f;
+    private float damageTimer;
 
     [Header("Movement")]
     [SerializeField] float moveSpeed = 5f;
@@ -36,7 +36,11 @@ public class Player : MonoBehaviour
     private Rigidbody2D rb;
 
     [Header("Tank Fire")]
-    public TankFire tankFire;  // Reference to the TankFire script (separate script)
+    public TankFire tankFire;
+
+    public UpgradeData healthUpgrade;  // Reference to upgrade
+    public UpgradeData speedUpgrade;   // Reference to upgrade
+    public UpgradeData damageUpgrade;  // Reference to upgrade
 
     private void OnEnable()
     {
@@ -54,34 +58,21 @@ public class Player : MonoBehaviour
         GameoverCanvas.SetActive(false);
         health = maxHealth;
         rb = GetComponent<Rigidbody2D>();
-        damageTimer = damageInterval; // Damage timer start
+        damageTimer = damageInterval;
 
-        // Initialize the UI
         UpdateLevelUI();
         UpdateExperienceBar();
-        UpdateHPUI();  // Update HP Text at the start
+        UpdateHPUI();
 
-        // Assign button actions for upgrades
-        increaseHPButton.onClick.AddListener(IncreaseHP);
-        shootFasterButton.onClick.AddListener(ShootFaster);
+        // Button Listeners
+        increaseHPButton.onClick.AddListener(() => ApplyUpgrade(healthUpgrade));
+        shootFasterButton.onClick.AddListener(() => ApplyUpgrade(speedUpgrade));
     }
 
     void Update()
     {
         Inputs();
         Move();
-
-        if (!enabled) return;  // If the script is disabled, stop the player from receiving input
-
-        if (currentLevel == 4)
-        {
-            EnemySpawner.spawnInterval = 3f;
-        }
-
-        if (currentLevel == 8)
-        {
-            EnemySpawner.spawnInterval = 2f;
-        }
     }
 
     void FixedUpdate()
@@ -89,26 +80,23 @@ public class Player : MonoBehaviour
         Move();
     }
 
-    // WASD Input Handling
     void Inputs()
     {
-        float moveX = Input.GetAxisRaw("Horizontal");  // A and D
-        float moveY = Input.GetAxisRaw("Vertical");    // W and S
+        float moveX = Input.GetAxisRaw("Horizontal");
+        float moveY = Input.GetAxisRaw("Vertical");
         moveDirection = new Vector2(moveX, moveY).normalized;
     }
 
     void Move()
     {
         rb.velocity = moveDirection * moveSpeed;
-
         if (moveDirection != Vector2.zero)
         {
-            float angle = Mathf.Atan2(moveDirection.y, moveDirection.x) * Mathf.Rad2Deg;  // Angle calculation
-            transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle + 90f));  // rotation
+            float angle = Mathf.Atan2(moveDirection.y, moveDirection.x) * Mathf.Rad2Deg;
+            transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle + 90f));
         }
     }
 
-    // Handle Experience Change
     private void HandleExperienceChange(int newExperience)
     {
         currentExperience += newExperience;
@@ -117,52 +105,50 @@ public class Player : MonoBehaviour
             LevelUp();
         }
 
-        UpdateExperienceBar();  // Update experience bar whenever experience changes
+        UpdateExperienceBar();
     }
 
-    // Handle Level Up
     private void LevelUp()
     {
         UpgradeCanvas.SetActive(true);
-        Time.timeScale = 0f;  // Pause game to let the player select an upgrade
+        Time.timeScale = 0f;
 
         health = maxHealth;
         currentLevel++;
-        currentExperience = 0;  // Reset current experience
-        maxExperience += 20;  // Increase max experience needed for the next level
+        currentExperience = 0;
+        maxExperience += 20;
 
-        // Update the UI
         UpdateLevelUI();
         UpdateHPUI();
         UpdateExperienceBar();
     }
 
-    // Increase the player's HP by 50
-    public void IncreaseHP()
+    public void ApplyUpgrade(UpgradeData upgrade)
     {
-        maxHealth += 50;
-        UpdateHPUI();
-        CloseUpgradeCanvas();
-    }
-
-    // Decrease TankFire's fireInterval by 0.1 seconds
-    public void ShootFaster()
-    {
-        if (tankFire != null)
+        switch (upgrade.upgradeType)
         {
-            tankFire.fireInterval -= 0.1f;  // Decrease fire interval
+            case UpgradeData.UpgradeType.Health:
+                maxHealth += (int)upgrade.upgradeValue;
+                break;
+            case UpgradeData.UpgradeType.Speed:
+                moveSpeed += upgrade.upgradeValue;
+                break;
+            case UpgradeData.UpgradeType.Damage:  // Instead of changing damagePerSecond, change the damageInterval
+                damageInterval = Mathf.Max(0.1f, damageInterval - upgrade.upgradeValue);  // Decrease the interval but ensure it doesn't go below a minimum value
+                break;
         }
+
+        Debug.Log($"Applied {upgrade.upgradeName}: {upgrade.upgradeType} +{upgrade.upgradeValue}");
         CloseUpgradeCanvas();
     }
 
-    // Close the upgrade canvas and resume the game
+
     private void CloseUpgradeCanvas()
     {
         UpgradeCanvas.SetActive(false);
-        Time.timeScale = 1f;  // Resume game
+        Time.timeScale = 1f;
     }
 
-    // Update Level Text UI
     private void UpdateLevelUI()
     {
         levelText.text = "Level: " + currentLevel;
@@ -173,38 +159,32 @@ public class Player : MonoBehaviour
         HPText.text = "HP: " + health;
     }
 
-    // Update Experience Bar Slider UI
     private void UpdateExperienceBar()
     {
         experienceBar.value = (float)currentExperience / maxExperience;
     }
 
-    // Handle player damage
     void TakeDamage(int someDamage)
     {
         health -= someDamage;
         if (health <= 0) Death();
-
-        UpdateHPUI();  // Update HP UI when the player takes damage
+        UpdateHPUI();
     }
 
-    // OnTriggerEnter for XP Orbs and Enemy Collision
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.CompareTag("Enemy"))
         {
-            TakeDamage(10);  // Take damage on contact with enemy
+            TakeDamage(10);
         }
 
         if (collision.gameObject.CompareTag("XPOrb"))
         {
-            Destroy(collision.gameObject);  // Destroy the XP orb
-            print("XP Orb Collected");
-            ExperienceManager.Instance.AddExperience(xpAmount);  // Add experience
+            Destroy(collision.gameObject);
+            ExperienceManager.Instance.AddExperience(xpAmount);
         }
     }
 
-    // Continuous damage from enemies
     private void OnTriggerStay2D(Collider2D collision)
     {
         if (collision.gameObject.CompareTag("Enemy"))
@@ -221,7 +201,6 @@ public class Player : MonoBehaviour
         }
     }
 
-    // Reset the damage timer when exiting enemy contact
     private void OnTriggerExit2D(Collider2D collision)
     {
         if (collision.gameObject.CompareTag("Enemy"))
@@ -230,10 +209,8 @@ public class Player : MonoBehaviour
         }
     }
 
-    // Handle Player Death
     void Death()
     {
-        print("Player Died");
         Time.timeScale = 0f;
         GameoverCanvas.SetActive(true);
     }
