@@ -112,7 +112,7 @@ public class GameManager : MonoBehaviour
     public void QuitGame()
     {
         Debug.Log("Quitting the game...");
-        Application.Quit();  // This will quit the game in a build
+        Application.Quit();
     }
 
     // Method to open settings menu

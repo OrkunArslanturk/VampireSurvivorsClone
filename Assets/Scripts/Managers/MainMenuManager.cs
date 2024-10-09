@@ -9,7 +9,7 @@ public class MainMenuManager : MonoBehaviour
     public GameObject settingsMenu;
     public GameObject mainMenu;
 
-    public TextMeshProUGUI killCountText;  // Reference to the TextMeshPro element
+    public TextMeshProUGUI killCountText;
 
     void Start()
     {
@@ -41,14 +41,12 @@ public class MainMenuManager : MonoBehaviour
         }
     }
 
-    // Method to start the game
     public void StartGame()
     {
-        // Load the game scene (replace "GameScene" with your actual gameplay scene name)
+        // Load the game scene
         SceneManager.LoadScene("GameScene");
     }
 
-    // Method to open settings (could be a separate settings panel)
     public void OpenSettings()
     {
         mainMenu.SetActive(false);
@@ -61,7 +59,6 @@ public class MainMenuManager : MonoBehaviour
         mainMenu.SetActive(true);
     }
 
-    // Method to quit the game
     public void QuitGame()
     {
         Application.Quit();

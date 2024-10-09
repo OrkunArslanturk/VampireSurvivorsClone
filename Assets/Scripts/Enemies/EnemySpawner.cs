@@ -26,10 +26,9 @@ public class EnemySpawner : MonoBehaviour
     {
         while (true)
         {
-            // Check if the game is paused
             while (gameManager.isPaused)
             {
-                yield return null;  // Wait for one frame and keep checking if the game is paused
+                yield return null;
             }
 
             // Randomize spawn point
@@ -41,14 +40,14 @@ public class EnemySpawner : MonoBehaviour
             enemySpawnCounter++;
             powerfulEnemyCounter++;
 
-            // Spawn powerful enemy every 'powerfulEnemyFrequency' spawns
+            // Spawn powerful enemy
             if (enemySpawnCounter >= powerfulEnemyFrequency)
             {
                 Instantiate(powerfulEnemyPrefab, spawnPoint.position, Quaternion.identity);
                 enemySpawnCounter = 0;  // Reset the counter after spawning a powerful enemy
             }
 
-            // Spawn most powerful enemy every 'mostPowerfulEnemyFrequency' spawns
+            // Spawn most powerful enemy
             if (powerfulEnemyCounter >= mostPowerfulEnemyFrequency)
             {
                 Instantiate(mostPowerfulEnemyPrefab, spawnPoint.position, Quaternion.identity);

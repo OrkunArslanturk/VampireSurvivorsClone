@@ -38,9 +38,9 @@ public class Player : MonoBehaviour
     [Header("Tank Fire")]
     public TankFire tankFire;
 
-    public UpgradeData healthUpgrade;  // Reference to upgrade
-    public UpgradeData speedUpgrade;   // Reference to upgrade
-    public UpgradeData damageUpgrade;  // Reference to upgrade
+    public UpgradeData healthUpgrade;
+    public UpgradeData speedUpgrade;
+    public UpgradeData damageUpgrade;
 
     private void OnEnable()
     {
@@ -64,7 +64,6 @@ public class Player : MonoBehaviour
         UpdateExperienceBar();
         UpdateHPUI();
 
-        // Button Listeners
         increaseHPButton.onClick.AddListener(() => ApplyUpgrade(healthUpgrade));
         shootFasterButton.onClick.AddListener(() => ApplyUpgrade(speedUpgrade));
     }
@@ -133,8 +132,8 @@ public class Player : MonoBehaviour
             case UpgradeData.UpgradeType.Speed:
                 moveSpeed += upgrade.upgradeValue;
                 break;
-            case UpgradeData.UpgradeType.Damage:  // Instead of changing damagePerSecond, change the damageInterval
-                damageInterval = Mathf.Max(0.1f, damageInterval - upgrade.upgradeValue);  // Decrease the interval but ensure it doesn't go below a minimum value
+            case UpgradeData.UpgradeType.Damage:
+                damageInterval = Mathf.Max(0.1f, damageInterval - upgrade.upgradeValue);
                 break;
         }
 

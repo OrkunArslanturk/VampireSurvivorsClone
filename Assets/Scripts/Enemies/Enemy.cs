@@ -15,7 +15,7 @@ public class Enemy : MonoBehaviour
     protected Transform player;
 
     [Header("XP Orb Settings")]
-    public GameObject xpOrbPrefab;  // Reference to the XP orb prefab
+    public GameObject xpOrbPrefab;  //XP orb prefab
     public float xpSpawnChance = 0.8f;  // 80% chance to spawn XP orb
 
     protected virtual void Start()
